@@ -1,0 +1,125 @@
+$primary-color: #1976d2;
+$error-color: #a66;
+$border-radius: 12px;
+$shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+
+.upload {
+    width: 500px;
+    margin: 50px auto 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+
+    &__instructions {
+        font-size: 16px;
+        color: #333;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    &__input {
+        display: none;
+    }
+
+    &__controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid #ddd;
+        border-radius: $border-radius;
+        padding: 8px 12px;
+        width: 260px;
+    }
+
+    &__filename {
+        color: #333;
+    }
+
+    &__button {
+        margin-left: 10px;
+    }
+
+    &__preview {
+        width: 400px;
+        max-height: 300px;
+
+        img {
+            width: 100%;
+            height: auto;
+            border-radius: $border-radius;
+        }
+    }
+
+    &__spinner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: $primary-color;
+        font-weight: bold;
+    }
+
+    &__error-message {
+        width: 260px;
+        background: #fee;
+        border: 1px solid #edd;
+        color: $error-color;
+        padding: 8px;
+        border-radius: 5px;
+        text-align: center;
+        font-size: 14px;
+    }
+}
+
+.result {
+    margin: 10px auto 0;
+    background: #fff;
+    width: 768px;
+    box-shadow: $shadow;
+    padding: 16px;
+    border-radius: $border-radius;
+
+    &__label {
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    &__text-wrapper {
+        position: relative;
+    }
+
+    &__text {
+        border: 1px solid #ddd;
+        border-radius: $border-radius;
+        padding: 16px 40px 16px 16px;
+        white-space: pre-wrap;
+        color: #333;
+        font-size: 14px;
+        min-height: 150px;
+    }
+
+    &__empty {
+        color: #666;
+        font-style: italic;
+        padding: 16px;
+        text-align: center;
+    }
+
+    &__copy-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        cursor: pointer;
+        color: $primary-color;
+
+        &:hover {
+            color: darken($primary-color, 20%);
+        }
+
+        &--check {
+            color: #28a745;
+        }
+    }
+}
