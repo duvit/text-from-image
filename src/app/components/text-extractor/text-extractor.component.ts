@@ -1,5 +1,4 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, signal, WritableSignal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { finalize, take } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,9 +21,8 @@ interface TextExtractionResult {
 
 @Component({
   selector: 'app-text-extractor',
-  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
     MatButtonModule,
     MatIconModule,
@@ -35,24 +33,23 @@ interface TextExtractionResult {
   styleUrls: ['./text-extractor.component.scss']
 })
 export class TextExtractorComponent {
-  fileName: string = '';
-  validFileSize: number = 2000000; //in bytes
-  uploadProgress: number | null = null;
-  extractedText: string = '';
-  errorMessage: string | null = null;
-  isLoading: boolean = false;
-  imagePreview: string | null = null;
-  isCopied: boolean = false;
+  private readonly validFileSize = 2000000;
+  private readonly allowedExtensions = ['jpg', 'jpeg', 'png'];
 
-  private allowedExtensions = ['jpg', 'jpeg', 'png'];
+  public fileName: WritableSignal<string | null> = signal('');
+  public extractedText: WritableSignal<string> = signal('');
+  public errorMessage: WritableSignal<string | null> = signal('');
+  public isLoading: WritableSignal<boolean> = signal(false);;
+  public imagePreview: WritableSignal<string | null> = signal(null);
+  public isCopied: WritableSignal<boolean> = signal(false);
 
   constructor(private http: HttpClient) { }
 
-  onFileSelected(event: Event): void {
+  public onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
 
     if (!input.files?.length) {
-      this.errorMessage = 'Please select a file to upload.';
+      this.errorMessage.set('Please select a file to upload.');
       return;
     }
 
@@ -61,37 +58,52 @@ export class TextExtractorComponent {
       return;
     }
 
-    this.fileName = file.name;
+    this.fileName.set(file.name);
     this.generatePreview(file);
     this.uploadFile(file);
   }
 
+  public copyText(): void {
+    if (this.extractedText()) {
+      navigator.clipboard.writeText(this.extractedText()).then(() => {
+        this.isCopied.set(true);
+
+        setTimeout(() => {
+          this.isCopied.set(false);
+        }, 2000);
+      })
+        .catch(() => {
+          this.errorMessage.set('Failed to copy text.');
+        });
+    }
+  }
+
   private validateFile(file: File): boolean {
     if (file.size > this.validFileSize) {
-      this.errorMessage = 'The file size must not exceed 2MB.';
+      this.errorMessage.set('The file size must not exceed 2MB.');
       return false;
     }
 
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
     if (!fileExtension || !this.allowedExtensions.includes(fileExtension)) {
-      this.errorMessage = 'Only JPEG and PNG files are allowed.';
+      this.errorMessage.set('Only JPEG and PNG files are allowed.');
       return false;
     }
 
-    this.errorMessage = null;
+    this.errorMessage.set(null);
     return true;
   }
 
   private generatePreview(file: File): void {
     const reader = new FileReader();
     reader.onload = (e) => {
-      this.imagePreview = e.target?.result as string;
+      this.imagePreview.set(e.target?.result as string);
     };
     reader.readAsDataURL(file);
   }
 
   private uploadFile(file: File): void {
-    this.isLoading = true;
+    this.isLoading.set(true);
     const formData = new FormData();
     formData.append('image', file);
 
@@ -101,14 +113,17 @@ export class TextExtractorComponent {
 
     this.http
       .post<TextExtractionResult[]>('https://api.api-ninjas.com/v1/imagetotext', formData, { headers })
-      .pipe(take(1), finalize(() => (this.isLoading = false)))
+      .pipe(take(1), finalize(() => {
+        this.isLoading.set(false);
+      }
+      ))
       .subscribe({
         next: (body) => {
-          this.extractedText = this.formatText(body);
-          this.errorMessage = null;
+          this.extractedText.set(this.formatText(body));
+          this.errorMessage.set(null);
         },
         error: (error) => {
-          this.errorMessage = error.error?.message || 'Upload failed';
+          this.errorMessage.set(error.error?.message || 'Upload failed');
         }
       });
   }
@@ -151,17 +166,5 @@ export class TextExtractorComponent {
           .join(' ')
       )
       .join('\n');
-  }
-
-
-  copyText(): void {
-    if (this.extractedText) {
-      navigator.clipboard.writeText(this.extractedText).then(() => {
-        this.isCopied = true;
-        setTimeout(() => (this.isCopied = false), 2000);
-      }).catch(() => {
-        this.errorMessage = 'Failed to copy text.';
-      });
-    }
   }
 }

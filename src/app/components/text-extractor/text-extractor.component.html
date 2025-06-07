@@ -1,47 +1,53 @@
 <div class="upload">
-    <div class="upload__instructions">Upload a JPEG or PNG image (up to 2MB).</div>
-  
-    <div class="upload__controls">
-      <div class="upload__filename">{{ fileName || "No file uploaded yet." }}</div>
-      <button mat-mini-fab color="primary" class="upload__button" (click)="fileUpload.click()">
-        <mat-icon>attach_file</mat-icon>
-      </button>
-    </div>
-  
-    <input
-      type="file"
-      class="upload__input"
-      accept="image/jpeg,image/png"
-      (change)="onFileSelected($event)"
-      #fileUpload
-    />
-  
-    <div *ngIf="imagePreview" class="upload__preview">
-      <img [src]="imagePreview" alt="Image preview" />
-    </div>
-  
-    <div *ngIf="isLoading" class="upload__spinner">
-      <mat-progress-spinner mode="indeterminate" diameter="25"></mat-progress-spinner>
-      <span>In progress...</span>
-    </div>
-  
-    <div *ngIf="errorMessage" class="upload__error-message">{{ errorMessage }}</div>
+  <div class="upload__instructions">Upload a JPEG or PNG image (up to 2MB).</div>
+
+  <div class="upload__controls">
+    <div class="upload__filename">{{ fileName() || "No file uploaded yet." }}</div>
+    <button mat-mini-fab color="primary" class="upload__button" (click)="fileUpload.click()">
+      <mat-icon>attach_file</mat-icon>
+    </button>
   </div>
-  
-  <div class="result">
-    <div class="result__label">Converted text:</div>
-    <div class="result__text-wrapper">
-      <div *ngIf="!extractedText" class="result__empty">No text extracted yet.</div>
-      <div *ngIf="extractedText" class="result__text">{{ extractedText }}</div>
-      <mat-icon
-        *ngIf="extractedText"
-        (click)="copyText()"
-        class="result__copy-btn"
-        [ngClass]="{ 'result__copy-btn--check': isCopied }"
-        title="Copy text to clipboard"
-      >
-        {{ isCopied ? 'check' : 'file_copy' }}
-      </mat-icon>
-    </div>
+
+  <input type="file" class="upload__input" accept="image/jpeg,image/png" (change)="onFileSelected($event)"
+    #fileUpload />
+
+
+  @if (imagePreview()) {
+  <div class="upload__preview">
+    <img [src]="imagePreview()" alt="Image preview" />
   </div>
-  
+  }
+
+  @if (isLoading()) {
+  <div class="upload__spinner">
+    <mat-progress-spinner mode="indeterminate" diameter="25"></mat-progress-spinner>
+    <span>In progress...</span>
+  </div>
+  }
+
+  @if (errorMessage()) {
+  <div class="upload__error-message">{{ errorMessage() }}</div>
+  }
+
+</div>
+
+<div class="result">
+  <div class="result__label">Converted text:</div>
+  <div class="result__text-wrapper">
+
+    @if (!extractedText) {
+    <div class="result__empty">No text extracted yet.</div>
+    }
+
+    @if (extractedText()) {
+    <div class="result__text">{{ extractedText() }}</div>
+    }
+
+    @if (extractedText()) {
+    <mat-icon (click)="copyText()" class="result__copy-btn" [class.result__copy-btn--check]="isCopied()"
+      title="Copy text to clipboard">
+      {{ isCopied() ? 'check' : 'file_copy' }}
+    </mat-icon>
+    }
+  </div>
+</div>
