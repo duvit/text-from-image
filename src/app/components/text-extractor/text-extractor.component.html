@@ -35,19 +35,17 @@
   <div class="result__label">Converted text:</div>
   <div class="result__text-wrapper">
 
-    @if (!extractedText) {
+    @if (!extractedText()) {
     <div class="result__empty">No text extracted yet.</div>
-    }
-
-    @if (extractedText()) {
+    } @else {
     <div class="result__text">{{ extractedText() }}</div>
-    }
 
-    @if (extractedText()) {
     <mat-icon (click)="copyText()" class="result__copy-btn" [class.result__copy-btn--check]="isCopied()"
       title="Copy text to clipboard">
       {{ isCopied() ? 'check' : 'file_copy' }}
     </mat-icon>
     }
+
+
   </div>
 </div>
